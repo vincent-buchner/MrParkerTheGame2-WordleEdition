@@ -80,21 +80,28 @@ namespace Program
             // Values will get appended to this string
             string returnWord = "";
 
+            // Goes through each char in the string
             for (int i = 0; i < guessedWord.Length; i++)
             {
+                // If it matches in the exact position, return "!"
                 if (guessedWord[i] == actualWord[i])
                 {
-                    // Modify it accordingly
+                    returnWord += $"!{guessedWord[i]} ";
                 }
+                // If the char is in the string, return "?"
                 else if (actualWord.Contains(guessedWord[i]))
                 {
-                    // Modify accordingly
+                    returnWord += $"?{guessedWord[i]} ";
                 }
+                // Otherwise, just add the letter with no mods
                 else
                 {
-                    // You know what to do
+                    returnWord += $"{guessedWord[i]} ";
                 }
             }
+
+            // After the operation is done, it will return that modified string
+            return returnWord;
         }
 
         static object gameLoop(string word,int lives,string[] guessed)
