@@ -75,6 +75,28 @@ namespace Program
                 "You will have six tries to guess the mystery five letter word. Best of luck!");
         }
 
+        static string wordChecker(string guessedWord, string actualWord)
+        {
+            // Values will get appended to this string
+            string returnWord = "";
+
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                if (guessedWord[i] == actualWord[i])
+                {
+                    // Modify it accordingly
+                }
+                else if (actualWord.Contains(guessedWord[i]))
+                {
+                    // Modify accordingly
+                }
+                else
+                {
+                    // You know what to do
+                }
+            }
+        }
+
         static object gameLoop(string word,int lives,string[] guessed)
         {
             // Const string that reads from the 'words.json' file inside of the bin folder
@@ -110,7 +132,8 @@ namespace Program
                 inputErrorWasCaught = true;
             }
 
-
+            // Word checker function
+            string checkedWord = wordChecker(playerGuess, word);
             
 
 
