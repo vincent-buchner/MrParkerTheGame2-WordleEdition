@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 // NEWTON
@@ -75,47 +76,62 @@ namespace Program
                 "You will have six tries to guess the mystery five letter word. Best of luck!");
         }
 
-        static string wordChecker(string guessedWord, string actualWord)
+        /// <summary>
+        /// This function will compare the differnces between two words, character by character. If the character is in the exact position and is the same, it will append a "!"
+        /// If the character is in the word but not in the correct position, it will append a "?"
+        /// </summary>
+        /// <param name="guessedWord">The user guessed word</param>
+        /// <param name="actualWord">The correct Wordle word</param>
+        /// <returns>A tuple: (the word after modification => string, if the word was guessed correctly => bool)</returns>
+        static (string, bool) wordChecker(string guessedWord, string actualWord)
         {
             // Values will get appended to this string
             string returnWord = "";
+            bool correctWordBool = false;
 
-            // Goes through each char in the string
-            for (int i = 0; i < guessedWord.Length; i++)
+            // NOTE: Add this value to the return value of the function
+            if (guessedWord == actualWord)
             {
-                // If it matches in the exact position, return "!"
-                if (guessedWord[i] == actualWord[i])
-                {
-                    returnWord += $"!{guessedWord[i]} ";
-                }
-                // If the char is in the string, return "?"
-                else if (actualWord.Contains(guessedWord[i]))
-                {
-                    returnWord += $"?{guessedWord[i]} ";
-                }
-                // Otherwise, just add the letter with no mods
-                else
-                {
-                    returnWord += $"{guessedWord[i]} ";
-                }
+                correctWordBool = true;
             }
 
+            // Goes through each char in the string
+            if (!correctWordBool) 
+            { 
+                for (int i = 0; i < guessedWord.Length; i++)
+                {
+                    // If it matches in the exact position, return "!"
+                    if (guessedWord[i] == actualWord[i])
+                    {
+                        returnWord += $"!{guessedWord[i]} ";
+                    }
+                    // If the char is in the string, return "?"
+                    else if (actualWord.Contains(guessedWord[i]))
+                    {
+                        returnWord += $"?{guessedWord[i]} ";
+                    }
+                    // Otherwise, just add the letter with no mods
+                    else
+                    {
+                        returnWord += $"{guessedWord[i]} ";
+                    }
+                }
+            }
+            
+
             // After the operation is done, it will return that modified string
-            return returnWord;
+            return (returnWord, correctWordBool);
         }
 
-        static object gameLoop(string word,int lives,string[] guessed)
+        static (string[], bool) gameFunction(string word,int lives,string[] guessed)
         {
             // Const string that reads from the 'words.json' file inside of the bin folder
             const string jsonFileIn = "words.json";
 
-            // This variable catches if a word was not in word bank or is too long/short
-            bool inputErrorWasCaught = false;
-
             // Complies thatc JSON into an object C# can undertsand
             dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
 
-            // Number of lives quessed
+            // Number of lives left
             Console.WriteLine($"You have {lives} live(s) left.");
 
             // The words already guessed(with mods)
@@ -133,17 +149,24 @@ namespace Program
             bool stringIsInJSON = jsonFile.Contains(playerGuess);
 
             // Checks JSON file for word
+            // If not, rerun game loop
             if (!stringIsInJSON)
             {
                 Console.WriteLine("Word was not found in word bank, please try again.");
-                inputErrorWasCaught = true;
+                gameFunction(word, lives, guessed);
             }
 
             // Word checker function
-            string checkedWord = wordChecker(playerGuess, word);
-            
+            (string, bool) checkedWord = wordChecker(playerGuess, word);
 
+            // Adds guessed string to array
+            guessed = new List<string>(guessed) { checkedWord.Item1 }.ToArray();
 
+            // What the Main function needs to know
+            // - If the player won
+            // - What words have been guessed
+
+            return (guessed, checkedWord.Item2);
 
         }
         static void Main(string[] args)
@@ -154,7 +177,24 @@ namespace Program
 
             gameIntro();
 
-            object[] resultsFromQuess = gameLoop(wordleWord, numberOfLives, alreadyGuessedWords);
+            // Put all of this if while loop that subtracts from lives
+            (string[], bool) resultsFromGuess = gameFunction(wordleWord, numberOfLives, alreadyGuessedWords);
+
+            if(resultsFromGuess.Item2)
+            {
+                // Break out of while loop
+                // Congrats message
+            }
+            else if (numberOfLives != 0)
+            {
+                // Subtract one from lives
+                // Replay gameFunction
+            }
+            else
+            {
+                // They lose
+                // Show Wordle word
+            }
             
         }
     }
