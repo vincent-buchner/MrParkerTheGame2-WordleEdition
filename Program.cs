@@ -63,7 +63,7 @@ namespace Program
             int randNumber = random.Next(0, jsonFile.Count);
 
             // Returns a random word from the array of words using that random number
-            return jsonFile[randNumber];
+            return jsonFile[2];
         }
 
         static void gameIntro()
@@ -96,8 +96,8 @@ namespace Program
             }
 
             // Goes through each char in the string
-            if (!correctWordBool) 
-            { 
+            if (!correctWordBool)
+            {
                 for (int i = 0; i < guessedWord.Length; i++)
                 {
                     // If it matches in the exact position, return "!"
@@ -117,16 +117,21 @@ namespace Program
                     }
                 }
             }
-            
+
 
             // After the operation is done, it will return that modified string
             return (returnWord, correctWordBool);
         }
 
-        static (string[], bool) gameFunction(string word,int lives,string[] guessed)
+        static (string[], bool) gameFunction(string word, int lives, string[] guessed)
         {
             // Const string that reads from the 'words.json' file inside of the bin folder
             const string jsonFileIn = "words.json";
+
+            //////////////////////////////////////////////////////
+            // TESTING
+            //////////////////////////////////////////////////////
+            Console.WriteLine(word);
 
             // Complies thatc JSON into an object C# can undertsand
             dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
@@ -145,14 +150,33 @@ namespace Program
             Console.WriteLine("Please enter your word: ");
             string playerGuess = Console.ReadLine();
 
-            // Checks if that word is in the list
-            bool stringIsInJSON = jsonFile.Contains(playerGuess);
+            // Player guess to lower
+            playerGuess = playerGuess.ToLower();
+
+            // Not worth checking the list if the word isn't even five characters long
+            if(playerGuess.Length != 5)
+            {
+                Console.WriteLine("Word is too short or too long, please try again");
+                gameFunction(word, lives, guessed);
+            }
+
 
             // Checks JSON file for word
             // If not, rerun game loop
-            if (!stringIsInJSON)
+            // Try and avoid this for loop
+            bool wordFound = false;
+            for(int i = 0; i < jsonFile.Count; i++ )
             {
-                Console.WriteLine("Word was not found in word bank, please try again.");
+                if (jsonFile[i] == playerGuess)
+                {
+                    wordFound = true;
+                    break;
+                }
+            }
+
+            if (!wordFound)
+            {
+                Console.WriteLine("Word was not found in our data base, please try again...");
                 gameFunction(word, lives, guessed);
             }
 
@@ -180,22 +204,36 @@ namespace Program
             // Put all of this if while loop that subtracts from lives
             (string[], bool) resultsFromGuess = gameFunction(wordleWord, numberOfLives, alreadyGuessedWords);
 
-            if(resultsFromGuess.Item2)
+            // Assignment to results: if the game is over
+            bool gameIsOver = resultsFromGuess.Item2;
+
+            while (!gameIsOver)
             {
-                // Break out of while loop
-                // Congrats message
+                if (numberOfLives <= 0)
+                {
+                    gameIsOver = true;
+                    Console.WriteLine("You lost!");
+                    Console.WriteLine($"The word was: {wordleWord}");
+                }
+                else
+                {
+                    // Subtract from lives
+                    numberOfLives--;
+
+                    // Put all of this if while loop that subtracts from lives
+                    resultsFromGuess = gameFunction(wordleWord, numberOfLives, alreadyGuessedWords);
+
+                    // Assignment to results: if the game is over
+                    gameIsOver = resultsFromGuess.Item2;
+                }
+
             }
-            else if (numberOfLives != 0)
+
+        if (gameIsOver && numberOfLives > 0)
             {
-                // Subtract one from lives
-                // Replay gameFunction
+                Console.WriteLine("You won!");
+                Console.WriteLine($"The word was: {wordleWord}");
             }
-            else
-            {
-                // They lose
-                // Show Wordle word
-            }
-            
         }
     }
 }
