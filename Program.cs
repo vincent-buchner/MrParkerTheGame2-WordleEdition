@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 // NEWTON
 using Newtonsoft.Json;
@@ -46,24 +48,26 @@ namespace Program
         /// <summary>
         /// <h1>Random Five Letter Word Returner</h1>
         /// 
-        /// All this function does is reads from a 'word.json' file inside the the bin folder and generates a random
+        /// All this function does is reads from a 'word.txt' file inside the the bin folder and generates a random
         /// number to index in that array.
         /// </summary>
         /// <returns>A random word as a string</returns>
         static string fiveLetterWord()
         {
-            // Const string that reads from the 'words.json' file inside of the bin folder
-            const string jsonFileIn = "words.json";
+            // Reads Text File
+            string rawText = File.ReadAllText(@"words.txt", Encoding.UTF8);
 
-            // Complies thatc JSON into an object C# can undertsand
-            dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
+            // Converts it to an array
+            List<string> listOfStrings = rawText.Split(",").ToList();
 
-            // Pulls a random number
+            // TEST
+            Console.WriteLine(listOfStrings);
+
+            // Generates a random number
             Random random = new Random();
-            int randNumber = random.Next(0, jsonFile.Count);
+            int randomNumber = random.Next(0, listOfStrings.Count);
 
-            // Returns a random word from the array of words using that random number
-            return jsonFile[2];
+            return listOfStrings[randomNumber];
         }
 
         static void gameIntro()
@@ -127,16 +131,14 @@ namespace Program
 
         static (string[], bool) gameFunction(string word, int lives, string[] guessed)
         {
-            // Const string that reads from the 'words.json' file inside of the bin folder
-            const string jsonFileIn = "words.json";
+            // Reads Text File
+            string rawText = File.ReadAllText(@"words.txt", Encoding.UTF8);
 
-            //////////////////////////////////////////////////////
-            // TESTING
-            //////////////////////////////////////////////////////
+            // Converts it to an array
+            List<string> listOfStrings = rawText.Split(",").ToList();
+
+            // TEST
             Console.WriteLine(word);
-
-            // Complies thatc JSON into an object C# can undertsand
-            dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
 
             // Number of lives left
             Console.WriteLine($"You have {lives} live(s) left.");
@@ -167,9 +169,9 @@ namespace Program
             // If not, rerun game loop
             // Try and avoid this for loop
             bool wordFound = false;
-            for(int i = 0; i < jsonFile.Count; i++ )
+            for(int i = 0; i < listOfStrings.Count; i++ )
             {
-                if (jsonFile[i] == playerGuess)
+                if (listOfStrings[i] == playerGuess)
                 {
                     wordFound = true;
                     break;
@@ -195,6 +197,11 @@ namespace Program
             return (guessed, checkedWord.Item2);
 
         }
+
+        /// <summary>
+        /// THE MAIN FUNCTION == This is where everything happens
+        /// </summary>
+        /// <param name="args"> no clue</param>
         static void Main(string[] args)
         {
             string wordleWord = fiveLetterWord();
@@ -221,6 +228,9 @@ namespace Program
                 {
                     // Subtract from lives
                     numberOfLives--;
+
+                    // New guessed words
+                    alreadyGuessedWords = resultsFromGuess.Item1;
 
                     // Put all of this if while loop that subtracts from lives
                     resultsFromGuess = gameFunction(wordleWord, numberOfLives, alreadyGuessedWords);
